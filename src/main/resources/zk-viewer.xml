@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="GB2312"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans default-autowire="byName">
+    <import resource="processor.xml" />
+	<!-- ===================== for ZooKeeper ======================= -->
+	<bean id="zooKeeper" class="org.zkviewer.zookeeper.ZooKeeperWrapper" init-method="init">
+		<property name="connectionTimeout" value="30000" />
+		<property name="sessionTimeout" value="30000" />
+		<property name="zkServerUrl" value="cq01-2011q3-setest1-3.vm:3000,cq01-2011q3-setest1-4.vm:3000,cq01-2011q3-setest1-5.vm:3000" />
+	</bean>
+	<bean id="clusterStatusManager" class="org.zkviewer.zookeeper.ClusterStatusManager"
+		init-method="init" depends-on="zooKeeper">
+	</bean>
+	<bean id="zkViewerContext" name="container,searchService" class="org.zkviewer.node.ZkViewerContext" init-method="init" />
+	<bean id="render" class="org.zkviewer.render.VelocityRender" init-method="init"/>
+	<!-- ===================== for webServer ======================= -->
+	<bean id="configContext" class="org.zkviewer.config.ConfigContext" />
+	<bean id="webServer" class="org.zkviewer.server.WebServer"
+		init-method="init" />
+	<bean id="mainServlet" class="org.zkviewer.server.MainServlet" />
+</beans>

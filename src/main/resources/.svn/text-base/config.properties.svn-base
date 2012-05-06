@@ -1,0 +1,7 @@
+web.server.port=8080
+
+#iss dispatcher thread pool setting
+iss.dispatcher.core.pool.size=30
+iss.dispatcher.max.pool.size=40
+iss.dispatcher.keep.alive.time=3
+iss.dispatcher.block.queue.size=20

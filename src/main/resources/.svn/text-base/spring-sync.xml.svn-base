@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="GB2312"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans default-autowire="byName">
+	<!-- =====================FOR Jingwei======================= -->
+	<!-- for zk config -->
+	<bean id="jingweiZkConfig" class="com.taobao.jingwei.common.config.impl.zk.ZkConfig">
+		<constructor-arg type="java.lang.String" value="${jingwei.zk.server.url}" />
+		<property name="zkSessionTimeoutMs" value="${jingwei.zk.session.timeout}" />
+		<property name="zkConnectionTimeoutMs" value="${jingwei.zk.connection.timeout}" />
+	</bean>
+	<bean id="jingweiConfigManager"
+		class="com.taobao.jingwei.common.config.impl.zk.ZkConfigManager"
+		init-method="init">
+		<property name="zkConfig" ref="jingweiZkConfig" />
+	</bean>
+	<!-- for applier config -->
+	<bean id="kaleidoscopeApplier" class="com.taobao.mic.sync.applier.MallItemApplier">
+		<property name="dispatcher" ref="dispatcherFactory" />
+	</bean>
+	<bean id="dispatcherFactory" name="dispatcherHolder"
+		class="com.taobao.mic.sync.dispatcher.DispatcherFactory" init-method="init" />
+
+	<bean id="jingWeiCore" class="com.taobao.jingwei.core.kernel.JingWeiCore"
+		init-method="init">
+		<property name="applier" ref="kaleidoscopeApplier" />
+		<property name="configManager" ref="jingweiConfigManager" />
+		<property name="taskName" value="${jingwei.taskName}" />
+	</bean>
+	<!-- =====================FOR ISS======================= -->
+	<bean id="schemas" class="org.springframework.beans.factory.config.SetFactoryBean">
+		<property name="sourceSet">
+			<set>
+				<value>IC_ITEM</value>
+				<value>IC_SKU</value>
+			</set>
+		</property>
+	</bean>
+	<bean id="issDispatchers" class="org.springframework.beans.factory.config.MapFactoryBean">
+		<property name="sourceMap">
+			<map>
+				<entry key="IC_ITEM">
+					<list>
+						<ref bean="itemDispatcher" />
+					</list>
+				</entry>
+				<entry key="IC_SKU">
+					<list>
+						<ref bean="skuDispatcher" />
+					</list>
+				</entry>
+			</map>
+		</property>
+	</bean>
+	<bean id="itemDispatcher" class="com.taobao.mic.sync.dispatcher.ItemDispatcher" />
+	<bean id="skuDispatcher" class="com.taobao.mic.sync.dispatcher.SkuDispatcher" />
+	<bean id="issClient" class="com.taobao.iss.client.ISSClient"/>
+	<bean id="retryPolicy" name="retryManager" class="com.taobao.mic.sync.retry.IssRetryPolicy"
+		init-method="init">
+		<property name="vlogFile" value="${retry.vlog.path}" />
+	</bean>
+	<bean id="itemStoreClient" class="com.taobao.vstore.client.DefaultStoreClientEngine">
+		<constructor-arg ref="itemConfig" />
+		<constructor-arg>
+			<bean factory-bean="itemConfig" factory-method="getLoadBalanceFactory" />
+		</constructor-arg>
+		<constructor-arg>
+			<bean factory-bean="itemConfig" factory-method="getVersion" />
+		</constructor-arg>
+	</bean>
+	<bean id="skuStoreClient" class="com.taobao.vstore.client.DefaultStoreClientEngine">
+		<constructor-arg ref="skuConfig" />
+		<constructor-arg>
+			<bean factory-bean="skuConfig" factory-method="getLoadBalanceFactory" />
+		</constructor-arg>
+		<constructor-arg>
+			<bean factory-bean="skuConfig" factory-method="getVersion" />
+		</constructor-arg>
+	</bean>
+	<bean id="searchClient" class="com.taobao.vsearch.client.impl.cloud.CloudVSearchServer"
+		init-method="init">
+		<constructor-arg ref="itemSearchConfig" />
+		<constructor-arg value="user_id" />
+		<property name="alwaysAddToGroupAllServer" value="true" />
+	</bean>
+	<bean id="itemSearchConfig" parent="zkConfig">
+		<property name="serviceName" value="IC_SEARCH" />
+	</bean>
+	<bean id="itemConfig" parent="zkConfig">
+		<property name="serviceName" value="IC_ITEM" />
+	</bean>
+	<bean id="skuConfig" parent="zkConfig">
+		<property name="serviceName" value="IC_SKU" />
+	</bean>
+	<bean id="zkConfig" class="com.taobao.iss.cfg.ISSClientConfig">
+		<property name="zooKeeperConnectString" value="${zk.server.url}" />
+		<property name="version" value="${zk.version}" />
+		<property name="zooKeeperSessionTimeoutMillis" value="${zk.session.timeout}" />
+	</bean>
+
+	<bean id="zooKeeperManager" class="com.taobao.mic.sync.zk.ZooKeeperManager" />
+
+	<bean name="zkConfigClient" class="com.taobao.kaleidoscope.zk.ZkConfigClient"
+		init-method="init" destroy-method="close">
+		<property name="connectionTimeout" value="${zk.connection.timeout}" />
+		<property name="sessionTimeout" value="${zk.session.timeout}" />
+		<property name="zkServerUrl" value="${jingwei.zk.server.url}" />
+	</bean>
+
+	<bean id="stdCategoryServices" class="${iss.forest.service.class.name}"
+		init-method="init" singleton="true">
+		<property name="storeDir">
+			<value>${iss.forest.file.dir}</value>
+		</property>
+		<property name="forestType">
+			<value>ForestCategoryDO</value>
+		</property>
+		<property name="version">
+			<value>${iss.forest.register.config.version}</value>
+		</property>
+	</bean>
+	<!-- for server -->
+	<bean id="configContext" class="com.taobao.mic.sync.helper.ConfigContext" />
+	<bean id="webServer" class="com.taobao.mic.sync.web.WebServer"
+		init-method="init" />
+	<bean id="mainServlet" class="com.taobao.kaleidoscope.servlet.MainServlet" />
+	<!-- check -->
+	<!-- <bean id="check" class="com.taobao.mic.sync.misc.Checker"/> -->
+	<bean id="backupChecker" class="com.taobao.mic.sync.helper.BackupServerChecker"
+		depends-on="jingWeiCore" init-method="init">
+		<property name="delay" value="${jingwei.zk.session.timeout}" />
+		<property name="configManager" ref="jingweiConfigManager" />
+		<property name="taskGroupString" value="${jingwei.task.group.list}" />
+	</bean>
+</beans>

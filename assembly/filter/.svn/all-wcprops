@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/repos/micvsearchdump/!svn/ver/23/branches/mic-sync-server/assembly/filter
+END
+pref.properties
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/repos/micvsearchdump/!svn/ver/23/branches/mic-sync-server/assembly/filter/pref.properties
+END
+dev.properties
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/repos/micvsearchdump/!svn/ver/117/branches/mic-sync-server/assembly/filter/dev.properties
+END
+sandbox.properties
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/repos/micvsearchdump/!svn/ver/23/branches/mic-sync-server/assembly/filter/sandbox.properties
+END
+product.properties
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/repos/micvsearchdump/!svn/ver/23/branches/mic-sync-server/assembly/filter/product.properties
+END
+daily.properties
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/repos/micvsearchdump/!svn/ver/117/branches/mic-sync-server/assembly/filter/daily.properties
+END

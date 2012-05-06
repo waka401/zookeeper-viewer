@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/repos/micvsearchdump/!svn/ver/23/branches/mic-sync-server/src/main/bin
+END
+serverctl.sh
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/repos/micvsearchdump/!svn/ver/23/branches/mic-sync-server/src/main/bin/serverctl.sh
+END
+calc_serverid.sh
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/repos/micvsearchdump/!svn/ver/23/branches/mic-sync-server/src/main/bin/calc_serverid.sh
+END
